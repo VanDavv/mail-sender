@@ -1,4 +1,5 @@
 import smtplib
+import time
 
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -33,6 +34,7 @@ class Mailer:
             msg.attach(part1)
             msg.attach(part2)
             self.mail.sendmail(self.me, to, msg.as_string())
+            self.retries = 0
         except Exception as e:
             print(f"Failed to send to {to}, error: {str(e)}")
             if self.retries < 3:
@@ -41,5 +43,7 @@ class Mailer:
                 self.connect()
                 self.send(to)
             else:
-                print("Max retries reached. Finishing...")
-                raise
+                print("Max retries reached. Waiting 15 minutes...")
+                time.sleep(900)
+                self.connect()
+                self.send(to)
